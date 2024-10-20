@@ -1,0 +1,29 @@
+﻿
+@model IEnumerable<FridgeManagementSystem.Models.Fridge>
+
+<h2>My Fridges</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Model</th>
+            <th>Purchase Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var fridge in Model)
+
+        {
+            <tr>
+                <td>@fridge.Name</td>
+                <td>@fridge.Model</td>
+                <td>@fridge.PurchaseDate.ToShortDateString()</td>
+                <td>
+                    <a href="@Url.Action("ReportFault", new { fridgeId = fridge.FridgeId })" class="btn btn-danger">Report Fault</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

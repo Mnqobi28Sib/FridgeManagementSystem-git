@@ -1,0 +1,28 @@
+﻿@using FridgeManagementSystem.Models
+@using FridgeManagementSystem.ViewModels
+
+@model IEnumerable<MaintenanceVisit>
+
+<h2>Technician Maintenance History</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Fridge ID</th>
+            <th>Scheduled Date</th>
+            <th>Completion Date</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var visit in Model)
+
+        {
+            <tr>
+                <td>@visit.FridgeId</td>
+                <td>@visit.ScheduledDate.ToShortDateString()</td>
+                <td>@(visit.CompletedDate?.ToShortDateString() ?? "N/A")</td>
+                <td>@visit.Notes</td>
+            </tr>
+        }
+    </tbody>
+</table>

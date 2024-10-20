@@ -1,0 +1,29 @@
+﻿
+@model IEnumerable<FridgeManagementSystem.Models.MaintenanceVisit>
+
+<div class="container mt-5">
+    <h2>Maintenance History</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Fridge Model</th>
+                <th>Visit Date</th>
+                <th>Technician</th>
+                <th>Issues Found</th>
+                <th>Actions Taken</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var visit in Model)
+            {
+                <tr>
+                    <td>@visit.Fridge.Model</td>
+                    <td>@visit.CompletedDate?.ToShortDateString()</td>
+                    <td>@visit.Technician.TechName</td>
+                    <td>@visit.Notes</td>
+                    <td>@visit.IsCompleted</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,29 @@
+﻿
+@model IEnumerable<FridgeManagementSystem.Models.Fridge>
+
+<div class="container mt-5">
+    <h2>My Fridges</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Fridge Model</th>
+                <th>Customer</th>
+                <th>Location</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var fridge in Model)
+            {
+                <tr>
+                    <td>@fridge.Model</td>
+                    <td>@fridge.Customer.Name</td>
+                    <td>@fridge.Location</td>
+                    <td>
+                        <a href="/Technician/ReportFault?fridgeId=@fridge.FridgeId" class="btn btn-danger">Report Fault</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

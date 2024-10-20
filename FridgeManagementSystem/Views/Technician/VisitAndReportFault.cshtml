@@ -1,0 +1,29 @@
+﻿@model FridgeManagementSystem.ViewModels.VisitAndFaultViewModel
+
+<h2>Visit Fridge and Report Fault</h2>
+
+<form asp-action="VisitAndReportFault" method="post">
+    <div class="form-group">
+        <label for="Fridge.Model">Fridge Model</label>
+        <input asp-for="Fridge.Model" class="form-control" readonly />
+    </div>
+
+    <div class="form-group">
+        <label for="FaultReport.Description">Fault Description</label>
+        <textarea asp-for="FaultReport.Description" class="form-control"></textarea>
+        <span asp-validation-for="FaultReport.Description" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="FaultReport.ReportedDate">Reported Date</label>
+        <input asp-for="FaultReport.ReportedDate" class="form-control" type="datetime-local" />
+        <span asp-validation-for="FaultReport.ReportedDate" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="FaultReport.IsResolved">Resolved?</label>
+        <input asp-for="FaultReport.IsResolved" class="form-control" type="checkbox" />
+    </div>
+
+    <button type="submit" class="btn btn-danger">Submit Fault Report</button>
+</form>

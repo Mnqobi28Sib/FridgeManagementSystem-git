@@ -1,0 +1,17 @@
+﻿
+@model FridgeManagementSystem.Models.FaultReport
+
+<div class="container mt-5">
+    <h2>Report a Fault</h2>
+
+    <form asp-action="ReportFault" method="post">
+        <div class="form-group">
+            <label for="Description">Fault Description</label>
+            <textarea class="form-control" id="Description" name="Description" rows="3">@Model.Description</textarea>
+        </div>
+
+        <input type="hidden" asp-for="FridgeId" />
+
+        <button type="submit" class="btn btn-primary mt-3">Submit Fault Report</button>
+    </form>
+</div>

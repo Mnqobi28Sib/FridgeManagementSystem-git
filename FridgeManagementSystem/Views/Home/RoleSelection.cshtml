@@ -1,0 +1,14 @@
+﻿@{
+    ViewBag.Title = "Role Selection";
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5 text-center">
+    <h1>Welcome to ChillTech Innovators</h1>
+    <p>Select your role to proceed</p>
+    <div class="list-group">
+        <a href="@Url.Action("TechnicianDashboard", "Technician")" class="list-group-item list-group-item-action">Technician Portal</a>
+        <a href="@Url.Action("CustomerDashboard", "Customer")" class="list-group-item list-group-item-action">Customer Portal</a>
+    </div>
+</div>

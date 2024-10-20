@@ -1,0 +1,28 @@
+﻿@model IEnumerable<FridgeManagementSystem.Models.MaintenanceVisit>
+
+<h2>Upcoming Maintenance Visits</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Fridge</th>
+            <th>Technician</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var visit in Model)
+
+        {
+            <tr>
+                <td>@visit.ScheduledDate.ToShortDateString()</td>
+                <td>@visit.Fridge.Name</td>
+                <td>@visit.Technician.TechName</td>
+                <td>
+                    <a href="@Url.Action("VisitAndReportFault", new { visitId = visit.Id })" class="btn btn-primary">Complete Visit</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
