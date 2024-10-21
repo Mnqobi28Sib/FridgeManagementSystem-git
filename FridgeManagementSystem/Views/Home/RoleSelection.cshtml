@@ -1,14 +1,23 @@
 ﻿@{
-    ViewBag.Title = "Role Selection";
+    ViewData["Title"] = ViewData["Title"] ?? "Welcome";
 
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    var pageTitle = ViewData["PageTitle"] ?? "Welcome to ChillTech Innovators";
+
+    var pageMessage = ViewData["PageMessage"] ?? "Please select your role to proceed.";
 }
 
-<div class="container mt-5 text-center">
-    <h1>Welcome to ChillTech Innovators</h1>
-    <p>Select your role to proceed</p>
-    <div class="list-group">
-        <a href="@Url.Action("TechnicianDashboard", "Technician")" class="list-group-item list-group-item-action">Technician Portal</a>
-        <a href="@Url.Action("CustomerDashboard", "Customer")" class="list-group-item list-group-item-action">Customer Portal</a>
+<div class="jumbotron text-center">
+    <h1 class="display-4">@pageTitle</h1>
+    <p class="lead">Efficiently manage your fridges, schedule maintenance, and troubleshoot any issues.</p>
+    <hr class="my-4">
+    <p>@pageMessage</p>
+
+    <div class="row">
+        <div class="col-md-6">
+            <a class="btn btn-primary btn-lg" href="/Technician/TechnicianDashboard" role="button">Technician Portal</a>
+        </div>
+        <div class="col-md-6">
+            <a class="btn btn-secondary btn-lg" href="/Customer/CustomerDashboard" role="button">Customer Portal</a>
+        </div>
     </div>
 </div>

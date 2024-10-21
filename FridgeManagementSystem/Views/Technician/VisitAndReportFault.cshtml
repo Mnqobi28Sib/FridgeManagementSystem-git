@@ -16,14 +16,16 @@
 
     <div class="form-group">
         <label for="FaultReport.ReportedDate">Reported Date</label>
-        <input asp-for="FaultReport.ReportedDate" class="form-control" type="datetime-local" />
+        <input asp-for="FaultReport.ReportedDate" class="form-control" type="datetime-local" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
         <span asp-validation-for="FaultReport.ReportedDate" class="text-danger"></span>
     </div>
 
     <div class="form-group">
         <label for="FaultReport.IsResolved">Resolved?</label>
-        <input asp-for="FaultReport.IsResolved" class="form-control" type="checkbox" />
+        <input asp-for="FaultReport.IsResolved" type="checkbox" />
     </div>
+
+    <input type="hidden" asp-for="ScheduledDate" /> 
 
     <button type="submit" class="btn btn-danger">Submit Fault Report</button>
 </form>

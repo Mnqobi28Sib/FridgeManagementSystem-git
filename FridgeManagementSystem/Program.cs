@@ -1,8 +1,9 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using FridgeManagementSystem.Data;
 using FridgeManagementSystem.Interfaces;
 using FridgeManagementSystem.Services;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,12 +15,25 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-// Add Identity services (for authentication)
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+// Remove Identity setup for user authentication and roles
+// builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+//     .AddRoles<IdentityRole>()
+//     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// Add Controllers with Views
-builder.Services.AddControllersWithViews();
+// Remove cookie-based authentication
+// builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+//     .AddCookie(options =>
+//     {
+//         options.LoginPath = "/MainSystem/Account/Login";
+//         options.LogoutPath = "/MainSystem/Account/Logout";
+//     });
+
+// Remove authorization policies
+// builder.Services.AddAuthorization(options =>
+// {
+//     options.AddPolicy("TechnicianOnly", policy => policy.RequireRole("Technician"));
+//     options.AddPolicy("CustomerOnly", policy => policy.RequireRole("Customer"));
+// });
 
 // Add Scoped services for Fridge and Maintenance visit
 builder.Services.AddScoped<IFridgeService, FridgeService>();
@@ -43,35 +57,27 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthorization();
+// Enable authentication and authorization middleware
+// app.UseAuthentication();
+// app.UseAuthorization();
 
-// Define custom routing here
+// Define custom routing
 app.UseEndpoints(endpoints =>
 {
-    // Default route points to the landing page
+    // Routes specific to the Fridge Management Subsystem
     endpoints.MapControllerRoute(
-        name: "default",
-        pattern: "{controller=Home}/{action=RoleSelection}/{id?}");
-
-    // Technician routes
-    endpoints.MapControllerRoute(
-        name: "technician_dashboard",
+        name: "TechnicianDashboard",
         pattern: "Technician/Dashboard",
         defaults: new { controller = "Technician", action = "TechnicianDashboard" });
 
-    // Customer routes
     endpoints.MapControllerRoute(
         name: "customer_dashboard",
         pattern: "Customer/Dashboard",
         defaults: new { controller = "Customer", action = "CustomerDashboard" });
 
-    // Additional default routes (for Razor Pages if needed)
     endpoints.MapControllerRoute(
-        name: "default_fallback",
+        name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}");
 });
-
-app.MapRazorPages(); // Enables Razor Pages
-
 
 app.Run();

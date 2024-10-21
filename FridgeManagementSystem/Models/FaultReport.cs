@@ -1,34 +1,37 @@
-﻿using FridgeManagementSystem.Models; 
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace FridgeManagementSystem.Models
 {
     public class FaultReport
     {
-        [Key] // Explicitly marking this as the primary key
+        [Key]
         public int ReportId { get; set; }
 
-        // Foreign key for Fridge
         [Required(ErrorMessage = "Fridge is required.")]
         public int? FridgeId { get; set; }
+        public virtual Fridge Fridge { get; set; }
 
-        // Navigation property
-        public required Fridge Fridge { get; set; }
-
-        // Foreign key for Technician
         [Required(ErrorMessage = "Technician is required.")]
         public int? TechId { get; set; }
+        public virtual Technician Technician { get; set; }
 
-        // Navigation property
-        public required Technician Technician { get; set; }
-
-        // Description with validation
         [Required(ErrorMessage = "Description is required.")]
         [StringLength(500, ErrorMessage = "Description cannot be longer than 500 characters.")]
         public string? Description { get; set; }
 
-        public DateTime? ReportedDate { get; set; }
-        public bool IsResolved { get; set; }
+        public DateTime ReportedDate { get; set; } = DateTime.Now;
+
+        public bool IsResolved { get; set; } = false;
+
+        // Constructor to enforce Fridge and Technician
+        public FaultReport(Fridge fridge, Technician technician)
+        {
+            Fridge = fridge ?? throw new ArgumentNullException(nameof(fridge));
+            Technician = technician ?? throw new ArgumentNullException(nameof(technician));
+        }
+
+        // Parameterless constructor for EF
+        public FaultReport() { }
     }
 }

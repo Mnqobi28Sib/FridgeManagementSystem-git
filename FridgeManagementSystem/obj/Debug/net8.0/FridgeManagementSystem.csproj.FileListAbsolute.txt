@@ -144,3 +144,4 @@ C:\Users\sibisi wiseman\Desktop\FridgeMaintenanceSubSystem\FridgeManagementSyste
 C:\Users\sibisi wiseman\Desktop\FridgeMaintenanceSubSystem\FridgeManagementSystem\obj\Debug\net8.0\FridgeManagementSystem.pdb
 C:\Users\sibisi wiseman\Desktop\FridgeMaintenanceSubSystem\FridgeManagementSystem\obj\Debug\net8.0\FridgeManagementSystem.genruntimeconfig.cache
 C:\Users\sibisi wiseman\Desktop\FridgeMaintenanceSubSystem\FridgeManagementSystem\obj\Debug\net8.0\ref\FridgeManagementSystem.dll
+C:\Users\sibisi wiseman\Desktop\FridgeMaintenanceSubSystem\FridgeManagementSystem\obj\Debug\net8.0\FridgeManagementSystem.sourcelink.json

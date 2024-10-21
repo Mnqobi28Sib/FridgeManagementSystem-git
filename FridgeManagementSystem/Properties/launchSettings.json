@@ -4,40 +4,23 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:5039",
-
-      "sslPort": 44325
+      "applicationUrl": "http://localhost:5039", // This will be used if running under IIS Express
+      "sslPort": 44325 // SSL port for IIS Express
     }
   },
   "profiles": {
-    "http": { // From the first file
-      "commandName": "Project",
-      "dotnetRunMessages": true,
-      "launchBrowser": true,
-      "applicationUrl": "http://localhost:5085",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
-    },
-    "https": { // From the first file
-      "commandName": "Project",
-      "dotnetRunMessages": true,
-      "launchBrowser": true,
-      "applicationUrl": "https://localhost:7277;http://localhost:5085",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
-    },
-    "IIS Express": { // From both files (redundant, keep one)
+    "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "FridgeManagementSystem": { // From the second file
-      "commandName": "Project",
+    "FridgeManagementSystem": {
+      "commandName": "Project", // This profile is for running the project directly
+      "dotnetRunMessages": true,
       "launchBrowser": true,
+      "applicationUrl": "http://localhost:5000;https://localhost:44325", // Adjusted for HTTP and HTTPS
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Security.Claims;
@@ -8,203 +9,207 @@ using System;
 using FridgeManagementSystem.ViewModels;
 using FridgeManagementSystem.Interfaces;
 
-
-public class CustomerController : Controller
+namespace FridgeManagementSystem.Controllers
 {
-    private readonly ApplicationDbContext _context;
-    private readonly IFridgeService _fridgeService;
-    private readonly IMaintenanceVisitService _maintenanceVisitService;
-
-    public CustomerController(ApplicationDbContext context, IFridgeService fridgeService, IMaintenanceVisitService maintenanceVisitService)
+    
+    public class CustomerController : Controller
     {
-        _context = context;
-        _fridgeService = fridgeService;
-        _maintenanceVisitService = maintenanceVisitService;
-    }
+        private readonly ApplicationDbContext _context;
+        private readonly IFridgeService _fridgeService;
+        private readonly IMaintenanceVisitService _maintenanceVisitService;
 
-    public async Task<IActionResult> CustomerDashboard()
-    {
-        var customerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (!int.TryParse(customerIdClaim, out int customerId))
+        public CustomerController(ApplicationDbContext context, IFridgeService fridgeService, IMaintenanceVisitService maintenanceVisitService)
         {
-            return RedirectToAction("Error", "Home");
+            _context = context;
+            _fridgeService = fridgeService;
+            _maintenanceVisitService = maintenanceVisitService;
         }
 
-        var customer = await _context.Customers
-            .Include(c => c.Fridges) // Include related fridges
-            .FirstOrDefaultAsync(c => c.CustomerId == customerId);
-
-        if (customer == null)
+        // Customer Dashboard
+        public async Task<IActionResult> CustomerDashboard()
         {
-            return RedirectToAction("Error", "Home");
+            // Get customer ID from Claims
+            var customerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            // Validate and convert customer ID
+            if (!int.TryParse(customerIdClaim, out int customerId))
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            // Retrieve customer and related data (fridges)
+            var customer = await _context.Customers
+                .Include(c => c.Fridges)
+                .FirstOrDefaultAsync(c => c.CustomerId == customerId);
+
+            if (customer == null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            // Retrieve upcoming visits
+            var upcomingVisits = await _context.MaintenanceVisits
+                .Where(v => v.CustomerId == customerId && !v.IsCompleted)
+                .ToListAsync();
+
+            // Create ViewModel
+            var viewModel = new CustomerDashboardViewModel
+            {
+                CustomerId = customerId,
+                Fridges = customer.Fridges,
+                UpcomingVisits = upcomingVisits,
+                Message = TempData["SuccessMessage"]?.ToString()
+            };
+
+            return View(viewModel);
         }
 
-        var upcomingVisits = await _context.MaintenanceVisits
-            .Where(v => v.CustomerId == customerId && !v.IsCompleted) // Get upcoming visits for the customer
-            .ToListAsync();
-
-        var viewModel = new CustomerDashboardViewModel
+        // Redirect to the customer dashboard with the customer's ID
+        public IActionResult RedirectToCustomerDashboard(int customerId)
         {
-            CustomerId = customerId,
-            Fridges = customer.Fridges, // Populate fridges
-            UpcomingVisits = upcomingVisits, // Populate upcoming visits
-            Message = TempData["SuccessMessage"]?.ToString() // Optional: message from TempData
-        };
+            var viewModel = new CustomerDashboardViewModel
+            {
+                CustomerId = customerId
+            };
 
-        return View(viewModel);
-    }
-
-
-    public IActionResult RedirectToCustomerDashboard(int customerId)
-    {
-        var viewModel = new CustomerDashboardViewModel
-        {
-            CustomerId = customerId
-        };
-
-        return View("CustomerDashboard", viewModel);
-    }
-
-    // Schedule a Maintenance Visit
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ScheduleVisit(MaintenanceVisit visit)
-    {
-        if (ModelState.IsValid)
-        {
-            // Add the maintenance visit to the database
-            _context.MaintenanceVisits.Add(visit);
-            await _context.SaveChangesAsync();
-
-            // Success message
-            TempData["SuccessMessage"] = "Maintenance visit scheduled successfully!";
-            return RedirectToAction("UpcomingVisits");
+            return View("CustomerDashboard", viewModel);
         }
 
-        // If validation fails, return the view with validation errors
-        return View(visit);
-    }
-
-    // View all fridges owned by the logged-in customer
-    public async Task<IActionResult> MyFridges()
-    {
-        var customerId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (!int.TryParse(customerId, out int parsedCustomerId))
+        // Schedule a Maintenance Visit
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ScheduleVisit(MaintenanceVisit visit)
         {
-            return RedirectToAction("Error", "Home");
+            if (ModelState.IsValid)
+            {
+                _context.MaintenanceVisits.Add(visit);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Maintenance visit scheduled successfully!";
+                return RedirectToAction("UpcomingVisits");
+            }
+
+            return View(visit);
         }
 
-        var customer = await _context.Customers
-            .Include(c => c.Fridges)
-            .FirstOrDefaultAsync(c => c.CustomerId == parsedCustomerId);
-
-        if (customer == null)
+        // View all fridges owned by the logged-in customer
+        public async Task<IActionResult> MyFridges()
         {
-            return RedirectToAction("Error", "Home");
+            var customerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(customerIdClaim, out int parsedCustomerId))
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            var customer = await _context.Customers
+                .Include(c => c.Fridges)
+                .FirstOrDefaultAsync(c => c.CustomerId == parsedCustomerId);
+
+            if (customer == null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            return View(customer.Fridges);
         }
 
-        return View(customer.Fridges);
-    }
-
-    // View upcoming maintenance visits for the customer's fridges
-    public async Task<IActionResult> UpcomingVisits()
-    {
-        var customerId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (!int.TryParse(customerId, out int parsedCustomerId))
+        // View upcoming maintenance visits for the customer's fridges
+        public async Task<IActionResult> UpcomingVisits()
         {
-            return RedirectToAction("Error", "Home");
+            var customerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(customerIdClaim, out int parsedCustomerId))
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            var customer = await _context.Customers
+                .Include(c => c.Fridges)
+                .ThenInclude(f => f.MaintenanceVisits)
+                .FirstOrDefaultAsync(c => c.CustomerId == parsedCustomerId);
+
+            if (customer == null)
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            var visits = customer.Fridges.SelectMany(f => f.MaintenanceVisits)
+                .Where(v => !v.IsCompleted)
+                .ToList();
+
+            return View(visits);
         }
 
-        var customer = await _context.Customers
-            .Include(c => c.Fridges)
-            .ThenInclude(f => f.MaintenanceVisits)
-            .FirstOrDefaultAsync(c => c.CustomerId == parsedCustomerId);
-
-        if (customer == null)
+        // View maintenance history for the customer's fridges
+        public async Task<IActionResult> CustomerMaintenanceHistory()
         {
-            return RedirectToAction("Error", "Home");
+            var customerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(customerIdClaim, out int parsedCustomerId))
+            {
+                return RedirectToAction("Error", "Home");
+            }
+
+            var maintenanceHistory = await _context.MaintenanceVisits
+                .Where(m => m.CustomerId == parsedCustomerId)
+                .ToListAsync();
+
+            return View("CustomerMaintenanceHistory", maintenanceHistory);
         }
 
-        var visits = customer.Fridges.SelectMany(f => f.MaintenanceVisits)
-            .Where(v => !v.IsCompleted)
-            .ToList();
-
-        return View(visits);
-    }
-
-    // View maintenance history for the customer's fridges
-    public async Task<IActionResult> CustomerMaintenanceHistory()
-    {
-        var customerId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (!int.TryParse(customerId, out int parsedCustomerId))
+        // Report a fault for a specific fridge (GET)
+        [HttpGet]
+        public async Task<IActionResult> ReportFault(int fridgeId)
         {
-            return RedirectToAction("Error", "Home");
+            var fridge = await _context.Fridges.FindAsync(fridgeId);
+
+            if (fridge == null)
+            {
+                return NotFound();
+            }
+
+            var technician = await _context.Technicians.FirstOrDefaultAsync();
+
+            if (technician == null)
+            {
+                return NotFound();
+            }
+
+            var faultReport = new FaultReport
+            {
+                Fridge = fridge,
+                Technician = technician,
+                FridgeId = fridgeId,
+                TechId = technician.TechId,
+                ReportedDate = DateTime.Now,
+                Description = string.Empty
+            };
+
+            return View(faultReport);
         }
 
-        // Retrieve the maintenance history for the customer
-        var maintenanceHistory = await _context.MaintenanceVisits
-            .Where(m => m.CustomerId == parsedCustomerId) // Assuming you have a CustomerId property
-            .ToListAsync();
-
-        return View("CustomerMaintenanceHistory", maintenanceHistory);
-    }
-
-    // Render the form to report a fault for a specific fridge
-    [HttpGet]
-    public async Task<IActionResult> ReportFault(int fridgeId)
-    {
-        var fridge = await _context.Fridges.FindAsync(fridgeId);
-
-        if (fridge == null)
+        // Handle fault report submission (POST)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ReportFault(FaultReport faultReport)
         {
-            return NotFound(); // Handle case where fridge is not found
+            if (ModelState.IsValid)
+            {
+                await _context.FaultReports.AddAsync(faultReport);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Fault report submitted successfully.";
+                return RedirectToAction("MyFridges");
+            }
+
+            return View(faultReport);
         }
 
-        var technician = await _context.Technicians.FirstOrDefaultAsync();
-
-        if (technician == null)
+        // Error action (optional)
+        public IActionResult Error()
         {
-            return NotFound(); // Handle case where no technicians are available
+            return View();
         }
-
-        // Create and initialize the FaultReport object with both Fridge and Technician
-        var faultReport = new FaultReport
-        {
-            Fridge = fridge, // Set the Fridge object, not just FridgeId
-            Technician = technician, // Set the Technician object, not just TechId
-            FridgeId = fridgeId, // FridgeId can still be assigned
-            TechId = technician.TechId, // TechId can still be assigned
-            ReportedDate = DateTime.Now,
-            Description = string.Empty
-        };
-
-        return View(faultReport);
-    }
-
-    // Handle fault report submission
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ReportFault(FaultReport faultReport)
-    {
-        if (ModelState.IsValid)
-        {
-            await _context.FaultReports.AddAsync(faultReport);
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = "Fault report submitted successfully.";
-            return RedirectToAction("MyFridges");
-        }
-
-        return View(faultReport); // Return the view with validation errors
-    }
-
-    // Error action (optional)
-    public IActionResult Error()
-    {
-        return View();
     }
 }

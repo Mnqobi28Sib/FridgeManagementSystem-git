@@ -1,23 +1,25 @@
-﻿using FridgeManagementSystem.Models;
-using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace FridgeManagementSystem.Models
 {
     public class MaintenanceVisit
     {
-        public int Id { get; set; } // Primary key
+        [Key] // Primary key
+        public int Id { get; set; }
 
-        [Required] // Fridge is required
-        public int FridgeId { get; set; }
-        [Required]
-        public int CustomerId { get; set; } // CustomerId is required
-        public Fridge Fridge { get; set; } // Navigation property
+        [Required(ErrorMessage = "Fridge is required.")]
+        public int FridgeId { get; set; } // Foreign key for Fridge
+        public Fridge Fridge { get; set; } // Navigation property for Fridge
 
-        [Required] // Technician is required
-        public int TechId { get; set; }
-        public Technician Technician { get; set; } // Navigation property
+        [Required(ErrorMessage = "Customer ID is required.")]
+        public int CustomerId { get; set; } // Foreign key for Customer
+        public Customer Customer { get; set; } // Navigation property for Customer
+
+        [Required(ErrorMessage = "Technician is required.")]
+        public int TechId { get; set; } // Foreign key for Technician
+        public Technician Technician { get; set; } // Navigation property for Technician
 
         [Required(ErrorMessage = "Scheduled date is required.")]
         [DataType(DataType.Date)]
@@ -26,7 +28,7 @@ namespace FridgeManagementSystem.Models
         public DateTime? CompletedDate { get; set; }
 
         [StringLength(255)]
-        public string? Notes { get; set; } // Optional
+        public string? Notes { get; set; } // Optional notes
 
         public bool IsCompleted { get; set; }
 
@@ -41,9 +43,6 @@ namespace FridgeManagementSystem.Models
                 );
             }
 
-            // Add other custom validation rules as necessary
         }
     }
-
 }
-

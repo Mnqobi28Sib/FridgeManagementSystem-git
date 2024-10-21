@@ -16,22 +16,14 @@ namespace FridgeManagementSystem.Controllers
         // Index method now directs to RoleSelection by default if no role is assigned
         public IActionResult Index()
         {
-            if (User.IsInRole("Technician"))
-            {
-                return RedirectToAction("TechnicianDashboard", "Technician");
-            }
-            else if (User.IsInRole("Customer"))
-            {
-                return RedirectToAction("CustomerDashboard", "Customer");
-            }
-            return RedirectToAction("RoleSelection");
-        }
-
-        // Role Selection for users who haven't chosen their role yet
-        public IActionResult RoleSelection()
-        {
+            ViewData["Title"] = "Home";
+            ViewData["PageTitle"] = "Welcome to ChillTech Innovators Fridge Management System";
+            ViewData["PageMessage"] = "Efficiently manage your fridges, schedule maintenance, and troubleshoot any issues.";
             return View();
         }
+
+
+        
 
         // Optional: This can be used to provide an About page
         public IActionResult About()
